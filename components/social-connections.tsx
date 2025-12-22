@@ -12,7 +12,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 type SocialConnectionStrategy = Extract<
   StartSSOFlowParams['strategy'],
-  'oauth_google' | 'oauth_github' | 'oauth_apple'
+  'oauth_google' | 'oauth_facebook'
 >;
 
 const SOCIAL_CONNECTION_STRATEGIES: {
@@ -21,19 +21,14 @@ const SOCIAL_CONNECTION_STRATEGIES: {
   useTint?: boolean;
 }[] = [
   {
-    type: 'oauth_apple',
-    source: { uri: 'https://img.clerk.com/static/apple.png?width=160' },
+    type: 'oauth_facebook',
+    source: { uri: 'https://img.clerk.com/static/facebook.png?width=160' },
     useTint: true,
   },
   {
     type: 'oauth_google',
     source: { uri: 'https://img.clerk.com/static/google.png?width=160' },
     useTint: false,
-  },
-  {
-    type: 'oauth_github',
-    source: { uri: 'https://img.clerk.com/static/github.png?width=160' },
-    useTint: true,
   },
 ];
 
