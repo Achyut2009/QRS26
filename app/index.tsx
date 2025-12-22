@@ -56,7 +56,7 @@ export default function Screen() {
               Make it yours{user?.firstName ? `, ${user.firstName}` : ''}.
             </Text>
             <Text className="ios:text-foreground text-center font-mono text-sm text-muted-foreground">
-              Update the screens and components to match your design and logic.
+              Update the screens and components to match your design and logic system.
             </Text>
           </View>
           <View className="gap-2">
