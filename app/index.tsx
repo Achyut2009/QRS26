@@ -53,11 +53,18 @@ export default function Screen() {
           </View>
           <View className="max-w-sm gap-2 px-4">
             <Text variant="h1" className="text-3xl font-medium">
-              Make it yours{user?.firstName ? `, ${user.firstName}` : ''}.
+              Hello{user?.firstName ? `, ${user.firstName}` : ''} — ready for quizes?
             </Text>
             <Text className="ios:text-foreground text-center font-mono text-sm text-muted-foreground">
-              Update the screens and components to match your design and logic.
+              Try out the quizzes page to take short knowledge checks.
             </Text>
+            <View className="mt-3">
+              <Link href="/quizes" asChild>
+                <Button>
+                  <Text>Go to Quizes</Text>
+                </Button>
+              </Link>
+            </View>
           </View>
           <View className="gap-2">
             <Link href="https://go.clerk.com/8e6CCee" asChild>

@@ -3,10 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Text } from '@/components/ui/text';
-import { useSignUp } from '@clerk/clerk-expo';
+import { useSignUp, useUser } from '@clerk/clerk-expo';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as React from 'react';
 import { type TextStyle, View } from 'react-native';
+import { Platform } from 'react-native';
 
 const RESEND_CODE_INTERVAL_SECONDS = 30;
 
@@ -14,6 +15,7 @@ const TABULAR_NUMBERS_STYLE: TextStyle = { fontVariant: ['tabular-nums'] };
 
 export function VerifyEmailForm() {
   const { signUp, setActive, isLoaded } = useSignUp();
+  const { user } = useUser();
   const { email = '' } = useLocalSearchParams<{ email?: string }>();
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState('');
@@ -32,6 +34,42 @@ export function VerifyEmailForm() {
       // and redirect the user
       if (signUpAttempt.status === 'complete') {
         await setActive({ session: signUpAttempt.createdSessionId });
+        // After session is active, attempt to sync the user to the DB.
+        // The `user` from `useUser()` may take a short moment to populate,
+        // so poll briefly until `user?.id` exists.
+        const syncUser = async () => {
+          let attempts = 0;
+          while ((!user || !user.id) && attempts < 10) {
+            // wait 300ms
+            // eslint-disable-next-line no-await-in-loop
+            await new Promise((r) => setTimeout(r, 300));
+            attempts += 1;
+          }
+
+            if (user && user.id && (user.primaryEmailAddress || user.emailAddresses)) {
+              const payload = {
+                id: user.id,
+                email: user.primaryEmailAddress?.emailAddress || user.emailAddresses?.[0]?.emailAddress,
+                firstName: user.firstName,
+                lastName: user.lastName,
+              };
+              try {
+                const API_BASE = Platform.OS === 'android' ? 'http://10.0.2.2:3000' : Platform.OS === 'ios' ? 'http://localhost:3000' : '';
+                const url = API_BASE ? `${API_BASE}/api/sync-user` : '/api/sync-user';
+                const res = await fetch(url, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload),
+                });
+                console.log('sync-user response', res.status);
+                try { console.log(await res.text()); } catch {};
+              } catch (e) {
+                console.warn('Failed to sync user after verification', e);
+              }
+            }
+        };
+
+        void syncUser();
         return;
       }
       // TODO: Handle other statuses

@@ -19,6 +19,25 @@ export function UserMenu() {
     await signOut();
   }
 
+  async function onRemoveFromDB() {
+    popoverTriggerRef.current?.close();
+    try {
+      if (user?.id) {
+        const API_BASE = (await import('react-native')).Platform.OS === 'android' ? 'http://10.0.2.2:3000' : (await import('react-native')).Platform.OS === 'ios' ? 'http://localhost:3000' : '';
+        const url = API_BASE ? `${API_BASE}/api/sync-user` : '/api/sync-user';
+        const res = await fetch(url, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: user.id }),
+        });
+        console.log('removeFromDB response', res.status);
+      }
+    } catch (err) {
+      console.warn('failed to remove user from DB', err);
+    }
+    await signOut();
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild ref={popoverTriggerRef}>
@@ -54,6 +73,11 @@ export function UserMenu() {
             <Button variant="outline" size="sm" className="flex-1" onPress={onSignOut}>
               <Icon as={LogOutIcon} className="size-4" />
               <Text>Sign Out</Text>
+            </Button>
+          </View>
+          <View className="px-3 pb-3">
+            <Button variant="destructive" size="sm" onPress={onRemoveFromDB}>
+              <Text>Remove from DB & Sign Out</Text>
             </Button>
           </View>
         </View>

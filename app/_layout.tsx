@@ -80,8 +80,8 @@ function Routes() {
         {/* Screens outside the guards are accessible to everyone (e.g. not found) */}
       </Stack>
 
-      {/* Footer only in main app, not in auth screens */}
-      {!isAuthRoute && <AppFooter />}
+      {/* Footer only when signed in and not on auth screens */}
+      {!isAuthRoute && isSignedIn && <AppFooter />}
     </View>
   );
 }

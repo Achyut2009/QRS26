@@ -1,7 +1,7 @@
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
-import { HomeIcon, UserIcon } from 'lucide-react-native';
+import { HomeIcon, UserIcon, BookOpenIcon } from 'lucide-react-native';
 import { Link, usePathname } from 'expo-router';
 import * as React from 'react';
 import { View, Pressable } from 'react-native';
@@ -11,6 +11,7 @@ export function AppFooter() {
 
   const isHome = pathname === '/' || pathname === '/index';
   const isProfile = pathname === '/profile';
+  const isQuizes = pathname === '/quizes' || pathname === '/quizzes';
 
   // Define Maroon color for Tailwind (or use hex directly in classes)
   const maroonHex = '#800000';
@@ -42,6 +43,27 @@ export function AppFooter() {
             )}
           </Pressable>
         </Link>
+
+        {/* Quizes Navigation */}
+          <Link href="/quizes" asChild>
+            <Pressable
+              android_ripple={{ color: 'transparent' }}
+              className="relative flex-1 items-center justify-center py-4"
+            >
+              <Icon
+                as={BookOpenIcon}
+                size={24}
+                color={isQuizes ? maroonHex : '#71717a'}
+              />
+
+              {isQuizes && (
+                <View
+                  className="absolute bottom-0 h-[3px] w-3/5 rounded-t-full"
+                  style={{ backgroundColor: maroonHex }}
+                />
+              )}
+            </Pressable>
+          </Link>
 
         {/* Profile Navigation */}
         <Link href="/profile" asChild>
