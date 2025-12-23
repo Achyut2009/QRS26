@@ -53,13 +53,12 @@ export default function ProfileScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Profile' }} />
       <View className="flex-1 bg-background">
         <View className="flex-1 px-4 pt-10 pb-4">
           {/* Top profile card */}
           <Card className="mb-4">
             <CardHeader className="flex-row items-center gap-4">
-              <Avatar className="size-16">
+              <Avatar className="size-16" alt={fullName}>
                 {user?.imageUrl ? (
                   <AvatarImage source={{ uri: user.imageUrl }} />
                 ) : (

@@ -24,14 +24,6 @@ const LOGO_STYLE: ImageStyle = {
   width: 40,
 };
 
-const SCREEN_OPTIONS = {
-  header: () => (
-    <View className="top-safe absolute left-0 right-0 flex-row justify-between px-4 py-2 web:mx-2">
-      <ThemeToggle />
-      <UserMenu />
-    </View>
-  ),
-};
 
 export default function Screen() {
   const { colorScheme } = useColorScheme();
@@ -39,7 +31,6 @@ export default function Screen() {
 
   return (
     <>
-      <Stack.Screen options={SCREEN_OPTIONS} />
       <View className="flex-1 bg-background">
         <View className="flex-1 items-center justify-center gap-8 p-4">
           <View className="flex-row items-center justify-center gap-3.5">
@@ -58,13 +49,6 @@ export default function Screen() {
             <Text className="ios:text-foreground text-center font-mono text-sm text-muted-foreground">
               Try out the quizzes page to take short knowledge checks.
             </Text>
-            <View className="mt-3">
-              <Link href="/quizes" asChild>
-                <Button>
-                  <Text>Go to Quizes</Text>
-                </Button>
-              </Link>
-            </View>
           </View>
           <View className="gap-2">
             <Link href="https://go.clerk.com/8e6CCee" asChild>
@@ -79,17 +63,3 @@ export default function Screen() {
   );
 }
 
-const THEME_ICONS = {
-  light: SunIcon,
-  dark: MoonStarIcon,
-};
-
-function ThemeToggle() {
-  const { colorScheme, toggleColorScheme } = useColorScheme();
-
-  return (
-    <Button onPress={toggleColorScheme} size="icon" variant="ghost" className="rounded-full">
-      <Icon as={THEME_ICONS[colorScheme ?? 'light']} className="size-6" />
-    </Button>
-  );
-}

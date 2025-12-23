@@ -12,7 +12,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 type SocialConnectionStrategy = Extract<
   StartSSOFlowParams['strategy'],
-  'oauth_google' | 'oauth_microsoft'
+  'oauth_google' | 'oauth_facebook'
 >;
 
 const SOCIAL_CONNECTION_STRATEGIES: {
@@ -28,10 +28,10 @@ const SOCIAL_CONNECTION_STRATEGIES: {
     name: 'Google',
   },
   {
-    type: 'oauth_microsoft',
-    source: { uri: 'https://img.clerk.com/static/microsoft.png?width=160' },
+    type: 'oauth_facebook',
+    source: { uri: 'https://img.clerk.com/static/facebook.png?width=160' },
     useTint: false,
-    name: 'Microsoft',
+    name: 'Facebook',
   },
 ];
 

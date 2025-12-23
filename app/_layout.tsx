@@ -73,8 +73,9 @@ function Routes() {
 
         {/* Screens only shown when the user IS signed in */}
         <Stack.Protected guard={isSignedIn}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="profile" />
+          <Stack.Screen name="index" options={SCREEN_OPTIONS} />
+          <Stack.Screen name="search" options={SCREEN_OPTIONS} />
+          <Stack.Screen name="profile" options={SCREEN_OPTIONS} />
         </Stack.Protected>
 
         {/* Screens outside the guards are accessible to everyone (e.g. not found) */}
@@ -85,6 +86,10 @@ function Routes() {
     </View>
   );
 }
+
+const SCREEN_OPTIONS = {
+  headerShown: false,
+};
 
 const SIGN_IN_SCREEN_OPTIONS = {
   headerShown: false,
