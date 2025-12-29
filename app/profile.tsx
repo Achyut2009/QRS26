@@ -9,8 +9,16 @@ import * as React from 'react';
 import { Alert, View } from 'react-native';
 
 export default function ProfileScreen() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { signOut } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+         <Text>Loading profile...</Text>
+      </View>
+    );
+  }
 
   const fullName = user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'Your name';
   const email = user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses[0]?.emailAddress ?? 'your@email.com';

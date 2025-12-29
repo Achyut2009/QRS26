@@ -14,15 +14,23 @@ const RESEND_CODE_INTERVAL_SECONDS = 30;
 const TABULAR_NUMBERS_STYLE: TextStyle = { fontVariant: ['tabular-nums'] };
 
 export function VerifyEmailForm() {
-  const { signUp, setActive, isLoaded } = useSignUp();
-  const { user } = useUser();
+  const { signUp, setActive, isLoaded: signUpLoaded } = useSignUp();
+  const { user, isLoaded: userLoaded } = useUser();
   const { email = '' } = useLocalSearchParams<{ email?: string }>();
+  
+  if (!userLoaded || !signUpLoaded) {
+    return (
+      <View className="flex-1 items-center justify-center p-6">
+        <Text>Initializing verification...</Text>
+      </View>
+    );
+  }
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState('');
   const { countdown, restartCountdown } = useCountdown(RESEND_CODE_INTERVAL_SECONDS);
 
   async function onSubmit() {
-    if (!isLoaded) return;
+    if (!signUpLoaded || !signUp) return;
 
     try {
       // Use the code the user provided to attempt verification
@@ -87,7 +95,7 @@ export function VerifyEmailForm() {
   }
 
   async function onResendCode() {
-    if (!isLoaded) return;
+    if (!signUpLoaded || !signUp) return;
 
     try {
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });

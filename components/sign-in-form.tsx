@@ -38,16 +38,29 @@ export function SignInForm() {
       }
       // TODO: Handle other statuses
       console.error(JSON.stringify(signInAttempt, null, 2));
-    } catch (err) {
+    } catch (err: any) {
       // See https://go.clerk.com/mRUDrIe for more info on error handling
-      if (err instanceof Error) {
-        const isEmailMessage =
-          err.message.toLowerCase().includes('identifier') ||
-          err.message.toLowerCase().includes('email');
-        setError(isEmailMessage ? { email: err.message } : { password: err.message });
+      console.error(JSON.stringify(err, null, 2));
+
+      if (err.errors && err.errors.length > 0) {
+        const firstError = err.errors[0];
+        const message = firstError.longMessage || firstError.message;
+        
+        if (firstError.code === 'form_identifier_not_found') {
+          setError({ email: message });
+        } else if (firstError.code === 'form_password_incorrect') {
+          setError({ password: message });
+        } else {
+           // Generic fallback for other errors
+           setError({ email: message, password: '' });
+        }
         return;
       }
-      console.error(JSON.stringify(err, null, 2));
+      
+      if (err instanceof Error) {
+        // Fallback for non-Clerk errors
+         setError({ email: err.message });
+      }
     }
   }
 

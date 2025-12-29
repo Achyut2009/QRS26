@@ -1,7 +1,7 @@
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
-import { HomeIcon, UserIcon, Search } from 'lucide-react-native';
+import { HomeIcon, UserIcon, Search, BookOpen } from 'lucide-react-native';
 import { Link, usePathname } from 'expo-router';
 import * as React from 'react';
 import { View, Pressable } from 'react-native';
@@ -13,10 +13,11 @@ export function AppFooter() {
   const maroonHex = '#800000';
 
   // active tab state keeps the tab highlighted on press; syncs with pathname
-  const [active, setActive] = React.useState<'home' | 'search' | 'profile' | null>(() => {
+  const [active, setActive] = React.useState<'home' | 'search' | 'profile' | 'quizzes' | null>(() => {
     if (pathname === '/' || pathname === '/index') return 'home';
     if (pathname === '/profile') return 'profile';
-    if (pathname === '/quizes' || pathname === '/quizzes' || pathname === '/search') return 'search';
+    if (pathname === '/search') return 'search';
+    if (pathname === '/quizzes') return 'quizzes';
     return null;
   });
 
@@ -24,12 +25,15 @@ export function AppFooter() {
     // keep active in sync when route changes externally
     if (pathname === '/' || pathname === '/index') setActive('home');
     else if (pathname === '/profile') setActive('profile');
-    else if (pathname === '/quizes' || pathname === '/quizzes' || pathname === '/search') setActive('search');
+    else if (pathname === '/search') setActive('search');
+    else if (pathname === '/quizzes') setActive('quizzes');
   }, [pathname]);
 
   const isHome = active === 'home';
   const isProfile = active === 'profile';
-  const isQuizes = active === 'search';
+  const isSearch = active === 'search';
+  const isQuizzes = active === 'quizzes';
+
 
   return (
     <View className="border-t border-border bg-background pb-safe">
@@ -60,7 +64,7 @@ export function AppFooter() {
           </Pressable>
         </Link>
 
-        {/* Quizes / Search Navigation */}
+        {/* Search / Map Navigation */}
         <Link href="/search" asChild>
           <Pressable
             android_ripple={{ color: 'transparent' }}
@@ -70,10 +74,10 @@ export function AppFooter() {
             <Icon
               as={Search}
               size={24}
-              color={isQuizes ? maroonHex : '#71717a'}
+              color={isSearch ? maroonHex : '#71717a'}
             />
 
-            {isQuizes && (
+            {isSearch && (
               <View
                 className="absolute bottom-0 h-[3px] w-3/5 rounded-t-full"
                 style={{ backgroundColor: maroonHex }}
@@ -81,6 +85,31 @@ export function AppFooter() {
             )}
           </Pressable>
         </Link>
+
+        {/* Quizzes Navigation */}
+        <Link href="/quizzes" asChild>
+          <Pressable
+            android_ripple={{ color: 'transparent' }}
+            className="relative flex-1 items-center justify-center py-4"
+            onPress={() => setActive('quizzes')}
+          >
+            <Icon
+              as={BookOpen}
+              size={24}
+              color={isQuizzes ? maroonHex : '#71717a'}
+            />
+
+            {isQuizzes && (
+              <View
+                className="absolute bottom-0 h-[3px] w-3/5 rounded-t-full"
+                style={{ backgroundColor: maroonHex }}
+              />
+            )}
+          </Pressable>
+        </Link>
+
+
+
 
         {/* Profile Navigation */}
         <Link href="/profile" asChild>

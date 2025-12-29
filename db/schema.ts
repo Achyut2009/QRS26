@@ -1,6 +1,8 @@
-// /db/schema.ts (updated with Clerk sync)
-import { pgTable, text, timestamp, uuid, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+// /db/schema.ts
+import { pgTable, text, timestamp, integer, boolean, jsonb, uuid, pgEnum } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+
+export const quizStatusEnum = pgEnum('quiz_status', ['draft', 'published', 'archived']);
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -8,65 +10,67 @@ export const users = pgTable("users", {
   firstName: text("first_name"),
   lastName: text("last_name"),
   profileImageUrl: text("profile_image_url"),
-  isAdmin: boolean("is_admin").default(false),
   clerkUserId: text("clerk_user_id").unique(), // Store Clerk user ID
   lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-// ... rest of your schema remains the same from previous message
-
+// Quizzes table
 export const quizzes = pgTable("quizzes", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   description: text("description"),
-  createdBy: text("created_by").references(() => users.id),
-  duration: integer("duration").notNull(), // Duration in minutes
-  totalQuestions: integer("total_questions").notNull(),
-  isActive: boolean("is_active").default(true),
-  scheduledStart: timestamp("scheduled_start", { withTimezone: true }), // When quiz becomes available
-  scheduledEnd: timestamp("scheduled_end", { withTimezone: true }), // When quiz expires
+  createdBy: text("created_by").notNull().references(() => users.email),
+  status: quizStatusEnum("status").default('draft').notNull(),
+  duration: integer("duration"), // in minutes, null means no time limit
+  totalQuestions: integer("total_questions").notNull().default(0),
+  passingScore: integer("passing_score").default(70), // percentage
+  tags: text("tags").array(),
+  metadata: jsonb("metadata"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
 });
 
+// Questions table
 export const questions = pgTable("questions", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  quizId: uuid("quiz_id").references(() => quizzes.id, { onDelete: "cascade" }),
-  questionText: text("question_text").notNull(),
-  questionType: text("question_type").notNull().default("multiple_choice"), // multiple_choice, true_false, short_answer
-  options: jsonb("options"), // For multiple choice: { a: "Option A", b: "Option B", ... }
-  correctAnswer: text("correct_answer").notNull(),
+  id: uuid("id").primaryKey().defaultRandom(),
+  quizId: uuid("quiz_id").notNull().references(() => quizzes.id, { onDelete: 'cascade' }),
+  question: text("question").notNull(),
+  type: text("type").notNull().default('multiple-choice'), // multiple-choice, true-false, etc.
+  options: jsonb("options").notNull(), // array of options
+  correctAnswer: integer("correct_answer").notNull(), // index of correct answer
   points: integer("points").default(1),
+  explanation: text("explanation"),
+  order: integer("order").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const attempts = pgTable("attempts", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: text("user_id").references(() => users.id),
-  quizId: uuid("quiz_id").references(() => quizzes.id),
-  score: integer("score").default(0),
-  totalScore: integer("total_score").default(0),
-  startedAt: timestamp("started_at", { withTimezone: true }).defaultNow(),
+// User quiz attempts table
+export const quizAttempts = pgTable("quiz_attempts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  quizId: uuid("quiz_id").notNull().references(() => quizzes.id),
+  userId: text("user_id").notNull().references(() => users.id),
+  score: integer("score").notNull().default(0),
+  totalScore: integer("total_score").notNull().default(0),
+  percentage: integer("percentage").notNull().default(0),
+  status: text("status").notNull().default('in-progress'), // in-progress, completed, abandoned
+  startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
   completedAt: timestamp("completed_at", { withTimezone: true }),
-  answers: jsonb("answers"), // Store user's answers: { questionId: "selectedAnswer" }
-  isCompleted: boolean("is_completed").default(false),
+  timeTaken: integer("time_taken"), // in seconds
+  userAnswers: jsonb("user_answers"), // store user's answers
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
-  quizzes: many(quizzes),
-  attempts: many(attempts),
-}));
-
-export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
+export const quizzesRelations = relations(quizzes, ({ many, one }) => ({
+  questions: many(questions),
+  attempts: many(quizAttempts),
   creator: one(users, {
     fields: [quizzes.createdBy],
-    references: [users.id],
+    references: [users.email],
   }),
-  questions: many(questions),
-  attempts: many(attempts),
 }));
 
 export const questionsRelations = relations(questions, ({ one }) => ({
@@ -76,13 +80,13 @@ export const questionsRelations = relations(questions, ({ one }) => ({
   }),
 }));
 
-export const attemptsRelations = relations(attempts, ({ one }) => ({
-  user: one(users, {
-    fields: [attempts.userId],
-    references: [users.id],
-  }),
+export const quizAttemptsRelations = relations(quizAttempts, ({ one }) => ({
   quiz: one(quizzes, {
-    fields: [attempts.quizId],
+    fields: [quizAttempts.quizId],
     references: [quizzes.id],
+  }),
+  user: one(users, {
+    fields: [quizAttempts.userId],
+    references: [users.id],
   }),
 }));
