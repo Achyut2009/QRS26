@@ -7,6 +7,6 @@ export default defineConfig({
   dialect: 'postgresql',
   dbCredentials: {
 
-    url: 'postgresql://neondb_owner:npg_gjJCTZPy7mx0@ep-billowing-feather-adzgwvkt-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+    url: process.env.DATABASE_URL as string,
   },
 });
